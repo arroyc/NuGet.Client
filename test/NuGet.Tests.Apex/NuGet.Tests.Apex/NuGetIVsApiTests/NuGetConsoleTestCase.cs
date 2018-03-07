@@ -474,6 +474,44 @@ namespace NuGet.Tests.Apex
             }
         }
 
+        [NuGetWpfTheory]
+        [MemberData(nameof(GetNetCoreTemplates))]
+        public void NetCoreAutoReferenceCannotBeUpdatedInPMC(ProjectTemplate projectTemplate)
+        {
+            // Arrange
+            EnsureVisualStudioHost();
+            var packageName = "TestPackage";
+            var packageVersion1 = "1.0.0";
+            var packageVersion2 = "2.0.0";
+
+            using (var testContext = new ApexTestContext(VisualStudio, projectTemplate))
+            {
+                Utils.CreatePackageInSource(testContext.PackageSource, packageName, packageVersion1);
+                Utils.CreatePackageInSource(testContext.PackageSource, packageName, packageVersion2);
+
+                //Preconditions
+                var nugetConsole = GetConsole(testContext.Project);
+                nugetConsole.InstallPackageFromPMC(packageName, packageVersion1);
+                testContext.Project.Build();
+                Utils.AssertPackageIsInstalled(GetNuGetTestService(), testContext.Project, packageName, packageVersion1);
+                
+                var searchString = $"\"{packageName}\" ";
+                var text = File.ReadAllText(testContext.Project.FullPath);
+
+                var referenceElement = text.IndexOf(searchString) + searchString.Length;
+                text = text.Substring(0, referenceElement) + " IsImplicitlyDefined=\"true\" " + text.Substring(referenceElement);
+                File.WriteAllText(testContext.Project.FullPath, text);
+
+                testContext.SolutionService.Build();
+                //Act
+                nugetConsole.UpdatePackageFromPMC(packageName, packageVersion2);
+                testContext.SolutionService.Build();
+
+                //Assert
+                Utils.AssertPackageIsInstalled(GetNuGetTestService(), testContext.Project, packageName, packageVersion1);
+            }
+        }
+
         // There  is a bug with VS or Apex where NetCoreConsoleApp creates a netcore 2.1 project that is not supported by the sdk
         // Commenting out any NetCoreConsoleApp template and swapping it for NetStandardClassLib as both are package ref.
         public static IEnumerable<object[]> GetNetCoreTemplates()
