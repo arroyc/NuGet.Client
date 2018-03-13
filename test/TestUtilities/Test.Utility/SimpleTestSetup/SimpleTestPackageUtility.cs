@@ -428,6 +428,7 @@ namespace NuGet.Test.Utility
                     using (var fileStream = File.OpenRead(file))
                     {
                         await PackageExtractor.InstallFromSourceAsync(
+                            string.Empty,
                             identity,
                             (stream) => fileStream.CopyToAsync(stream, 4096, CancellationToken.None),
                             new VersionFolderPathResolver(root),
@@ -481,7 +482,7 @@ namespace NuGet.Test.Utility
             {
                 using (var stream = File.OpenRead(path))
                 {
-                    await PackageExtractor.ExtractPackageAsync(stream, resolver, context, CancellationToken.None);
+                    await PackageExtractor.ExtractPackageAsync(string.Empty, stream, resolver, context, CancellationToken.None);
                 }
             }
         }

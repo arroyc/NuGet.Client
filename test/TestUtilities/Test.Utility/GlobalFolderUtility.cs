@@ -41,7 +41,9 @@ namespace NuGet.Test.Utility
 
                 using (var stream = File.OpenRead(packagePath))
                 {
-                    await PackageExtractor.InstallFromSourceAsync(reader.GetIdentity(),
+                    await PackageExtractor.InstallFromSourceAsync(
+                        string.Empty,
+                        reader.GetIdentity(),
                         async (d) => await stream.CopyToAsync(d),
                         versionFolderPathResolver,
                         pathContext,

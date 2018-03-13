@@ -60,6 +60,8 @@ namespace NuGet.Protocol.Plugins
             }
         }
 
+        public string Source => "";
+
         /// <summary>
         /// Initializes a new <see cref="PluginPackageDownloader" /> class.
         /// </summary>

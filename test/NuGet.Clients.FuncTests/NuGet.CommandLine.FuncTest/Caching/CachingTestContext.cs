@@ -315,6 +315,7 @@ namespace NuGet.CommandLine.Test.Caching
             using (var fileStream = new FileStream(packagePath, FileMode.Open, FileAccess.Read))
             {
                 using (await GlobalPackagesFolderUtility.AddPackageAsync(
+                    string.Empty,
                     identity,
                     fileStream,
                     GlobalPackagesPath,

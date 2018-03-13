@@ -66,6 +66,8 @@ namespace NuGet.Protocol
             }
         }
 
+        public string Source { get; }
+
         /// <summary>
         /// Initializes a new <see cref="RemotePackageArchiveDownloader" /> class.
         /// </summary>
@@ -80,6 +82,7 @@ namespace NuGet.Protocol
         /// is <c>null</c>.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
         public RemotePackageArchiveDownloader(
+            string source,
             FindPackageByIdResource resource,
             PackageIdentity packageIdentity,
             SourceCacheContext cacheContext,
@@ -111,6 +114,7 @@ namespace NuGet.Protocol
             _logger = logger;
             _packageReader = new Lazy<PackageArchiveReader>(GetPackageReader);
             _handleExceptionAsync = exception => Task.FromResult(false);
+            Source = source;
         }
 
         /// <summary>

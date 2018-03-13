@@ -208,6 +208,7 @@ namespace NuGet.Protocol.Core.Types
                         var versionFolderPathResolver = new VersionFolderPathResolver(source);
 
                         using (var packageDownloader = new LocalPackageArchiveDownloader(
+                            string.Empty,
                             packagePath,
                             packageIdentity,
                             logger))
