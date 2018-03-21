@@ -151,8 +151,8 @@ namespace NuGet.Protocol.Core.Types
                         key => new Lazy<Task<IReadOnlyList<OperationClaim>>>(() =>
                         GetPluginOperationClaimsAsync(
                             plugin,
-                            null,
-                            null,
+                            packageSourceRepository,
+                            serviceIndex,
                             cancellationToken)));
 
                 await lazyOperationClaims.Value;
