@@ -20,10 +20,6 @@ namespace NuGet.Credentials.Test
 {
     public class SecurePluginCredentialProviderTests
     {
-        
-        private const string _sourceUri = "https://unit.test";
-
-
         [Fact]
         public void Create_ThrowsForNullPlugin()
         {
@@ -70,16 +66,24 @@ namespace NuGet.Credentials.Test
             return new PluginDiscoveryResult(new PluginFile(@"C:\random\path\plugin.exe", pluginState));
         }
 
-
-        // TODO NK
-
         [PlatformFact(Platform.Windows)]
-        public async Task TryCreate_ReturnsValidCredentials()
+        public void TryCreate_ReturnsValidCredentials()
         {
+            var uri = new Uri("https://api.nuget.org/v3/index.json");
+            var authUsername = "username";
+            var authPassword = "password";
+            var expectation = new TestExpectation(
+                null,
+                null,
+                new[] { OperationClaim.Authentication },
+                ConnectionOptions.CreateDefault(),
+                Protocol.Plugins.ProtocolConstants.CurrentVersion,
+                uri,
+                authUsername,
+                authPassword
+                );
 
-            var expectation = new PositiveTestExpectation(null, null, new[] { OperationClaim.DownloadPackage }, ConnectionOptions.CreateDefault(), Protocol.Plugins.ProtocolConstants.CurrentVersion);
-
-            using (var test = new PluginManagerPositiveTest(
+            using (var test = new PluginManagerMock(
                 pluginFilePath: "a",
                 pluginFileState: PluginFileState.Valid,
                 expectations: expectation))
@@ -87,74 +91,22 @@ namespace NuGet.Credentials.Test
                 var discoveryResult = new PluginDiscoveryResult(new PluginFile("a", PluginFileState.Valid));
                 var provider = new SecurePluginCredentialProvider(discoveryResult, NullLogger.Instance);
 
-                provider.GetAsync(new Uri("bla"), null, CredentialRequestType.Unauthorized, "bla", false, true, CancellationToken.None);
+                System.Net.IWebProxy proxy = null;
+                var credType = CredentialRequestType.Unauthorized;
+                var message = "nothing";
+                var isRetry = false;
+                var isInteractive = false;
+                var token = CancellationToken.None;
+                var credentialResponse = provider.GetAsync(uri, proxy, credType, message, isRetry, isInteractive, token).Result;
 
-                //var result = await test.Provider.TryCreate(expectations[0].SourceRepository, CancellationToken.None);
-
-                //Assert.True(result.Item1);
-                //Assert.IsType<PluginResource>(result.Item2);
-
-                //var pluginResource = (PluginResource)result.Item2;
-                //var pluginResult = await pluginResource.GetPluginAsync(
-                //    OperationClaim.DownloadPackage,
-                //    CancellationToken.None);
-
-                //Assert.NotNull(pluginResult);
-                //Assert.NotNull(pluginResult.Plugin);
-                //Assert.NotNull(pluginResult.PluginMulticlientUtilities);
+                Assert.True(credentialResponse.Status == CredentialStatus.Success);
+                Assert.NotNull(credentialResponse.Credentials);
+                Assert.Equal(authUsername, credentialResponse.Credentials.GetCredential(uri, null).UserName);
+                Assert.Equal(authPassword, credentialResponse.Credentials.GetCredential(uri, null).Password);
             }
         }
 
-        //[PlatformFact(Platform.Windows)]
-        //public async Task TryCreate_QueriesPluginForEachPackageSourceRepository()
-        //{
-        //    var expectations = new[]
-        //        {
-        //            new PositiveTestExpectation("{\"serviceIndex\":1}", "https://1.unit.test", new [] { OperationClaim.DownloadPackage }),
-        //            new PositiveTestExpectation("{\"serviceIndex\":2}", "https://2.unit.test", Enumerable.Empty<OperationClaim>()),
-        //            new PositiveTestExpectation("{\"serviceIndex\":3}", "https://3.unit.test", new [] { OperationClaim.DownloadPackage })
-        //        };
-
-        //    using (var test = new PluginResourceProviderPositiveTest(
-        //        pluginFilePath: "a",
-        //        pluginFileState: PluginFileState.Valid,
-        //        expectations: expectations))
-        //    {
-        //        IPlugin firstPluginResult = null;
-        //        IPlugin thirdPluginResult = null;
-
-        //        for (var i = 0; i < expectations.Length; ++i)
-        //        {
-        //            var expectation = expectations[i];
-        //            var result = await test.Provider.TryCreate(expectation.SourceRepository, CancellationToken.None);
-
-        //            Assert.True(result.Item1);
-        //            Assert.IsType<PluginResource>(result.Item2);
-
-        //            var pluginResource = (PluginResource)result.Item2;
-        //            var pluginResult = await pluginResource.GetPluginAsync(
-        //                OperationClaim.DownloadPackage,
-        //                CancellationToken.None);
-
-        //            switch (i)
-        //            {
-        //                case 0:
-        //                    firstPluginResult = pluginResult.Plugin;
-        //                    break;
-
-        //                case 1:
-        //                    Assert.Null(pluginResult);
-        //                    break;
-
-        //                case 2:
-        //                    thirdPluginResult = pluginResult.Plugin;
-        //                    break;
-        //            }
-        //        }
-
-        //        Assert.NotNull(firstPluginResult);
-        //        Assert.Same(firstPluginResult, thirdPluginResult);
-        //    }
-        //}
+        // TODO NK - Add a negative test.
+        // Make sure that it doesn't make any plugin calls, the 2nd time the getcredentials call is made
     }
 }

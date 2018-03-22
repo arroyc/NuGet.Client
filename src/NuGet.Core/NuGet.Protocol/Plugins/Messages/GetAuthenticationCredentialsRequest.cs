@@ -4,7 +4,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace NuGet.Protocol.Plugins.Messages
+namespace NuGet.Protocol.Plugins
 {
 
 

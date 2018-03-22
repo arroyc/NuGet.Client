@@ -95,7 +95,7 @@ namespace NuGet.Credentials
         private static CredentialResponse GetCredentialResponseToCredentiaResponse(GetAuthenticationCredentialsResponse credentialResponse)
         {
             CredentialResponse taskResponse;
-            if (credentialResponse.IsValid) // TODO NK - Handle the error case gracefully.
+            if (credentialResponse.IsValid)
             {
                 ICredentials result = new NetworkCredential(credentialResponse.Username, credentialResponse.Password);
                 if (credentialResponse.AuthTypes != null)
