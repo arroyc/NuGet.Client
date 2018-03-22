@@ -226,7 +226,7 @@ namespace NuGet.Protocol.FuncTest
                     _isDisposed = true;
                 }
             }
-
+            // TODO NK - I can use this thing to actually run credential provider tests
             internal static async Task<PluginTest> CreateAsync()
             {
                 var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(10));

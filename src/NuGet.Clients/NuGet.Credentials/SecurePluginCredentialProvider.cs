@@ -19,11 +19,20 @@ namespace NuGet.Credentials
         // We use this to avoid needlessly instantiating plugins if they don't support authentication.
         private bool IsAnAuthenticationPlugin { get; set; } = true;
 
-        public SecurePluginCredentialProvider(PluginDiscoveryResult plugin, Common.ILogger logger)
+        public SecurePluginCredentialProvider(PluginDiscoveryResult pluginDiscoveryResult, Common.ILogger logger)
         {
-            DiscoveredPlugin = plugin;
-            Logger = logger;
-            Id = $"{nameof(SecurePluginCredentialProvider)}_{plugin.PluginFile}";
+            if (pluginDiscoveryResult == null)
+            {
+                throw new ArgumentNullException(nameof(pluginDiscoveryResult));
+            }
+            if (pluginDiscoveryResult.PluginFile.State != PluginFileState.Valid)
+            {
+                throw new ArgumentException("Cannot create a provider from an invalid plugin. Plugin state: " + pluginDiscoveryResult.PluginFile.State + " " + pluginDiscoveryResult.Message);
+
+            }
+            DiscoveredPlugin = pluginDiscoveryResult;
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Id = $"{nameof(SecurePluginCredentialProvider)}_{pluginDiscoveryResult.PluginFile.Path}";
         }
 
         /// <summary>
