@@ -15,7 +15,7 @@ namespace NuGet.Configuration
 
         public TrustedSourceProvider(ISettings settings)
         {
-            _settings = settings;
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
         public IEnumerable<TrustedSource> LoadTrustedSources()
