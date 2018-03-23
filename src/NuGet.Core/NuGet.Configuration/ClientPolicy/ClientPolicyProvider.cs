@@ -16,17 +16,25 @@ namespace NuGet.Configuration
 
         public ClientPolicy LoadClientPolicy()
         {
-            throw new NotImplementedException();
+            var policy = ClientPolicy.Accept;
+            var policyString = SettingsUtility.GetConfigValue(_settings, ConfigurationConstants.SignatureValidationMode);
+
+            if (!string.IsNullOrEmpty(policyString))
+            {
+                Enum.TryParse(policyString, ignoreCase: true, result: out policy);
+            }
+
+            return policy;
         }
 
         public void SaveClientPolicy(ClientPolicy policy)
         {
-            throw new NotImplementedException();
+            SettingsUtility.SetConfigValue(_settings, ConfigurationConstants.SignatureValidationMode, policy.ToString());
         }
 
         public void DeleteClientPolicy()
         {
-            throw new NotImplementedException();
+            SettingsUtility.DeleteConfigValue(_settings, ConfigurationConstants.SignatureValidationMode);
         }
     }
 }

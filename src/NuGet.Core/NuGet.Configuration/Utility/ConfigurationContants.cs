@@ -13,6 +13,8 @@ namespace NuGet.Configuration
 
         public static readonly string TrustedSources = "trustedSources";
 
+        public static readonly string SignatureValidationMode = "signatureValidationMode";
+
         public static readonly string DefaultPushSource = "DefaultPushSource";
 
         public static readonly string PackageRestore = "packageRestore";
