@@ -9,7 +9,6 @@ $PackageReleaseVersion = "4.6.0"
 
 $NuGetClientRoot = Split-Path -Path $PSScriptRoot -Parent
 $CLIRoot = Join-Path $NuGetClientRoot cli
-$CLIRootForPack = Join-Path $NuGetClientRoot "cli1.0.4"
 $Artifacts = Join-Path $NuGetClientRoot artifacts
 $Nupkgs = Join-Path $Artifacts nupkgs
 $ReleaseNupkgs = Join-Path $Artifacts ReleaseNupkgs
@@ -214,49 +213,6 @@ Function Install-DotnetCLI {
         Invoke-WebRequest $cli.DotNetInstallUrl -OutFile $DotNetInstall
 
         & $DotNetInstall -Channel Master -i $cli.Root -Version 2.1.103
-    }
-
-    if (-not (Test-Path $cli.DotNetExe)) {
-        Error-Log "Unable to find dotnet.exe. The CLI install may have failed." -Fatal
-    }
-
-    # Display build info
-    & $cli.DotNetExe --info
-}
-
-Function Install-DotnetCLIToILMergePack {
-    [CmdletBinding()]
-    param(
-        [switch]$Force
-    )
-
-    $cli = @{
-            Root = $CLIRootForPack
-            DotNetExe = Join-Path $CLIRootForPack 'dotnet.exe'
-            DotNetInstallUrl = 'https://raw.githubusercontent.com/dotnet/cli/58b0566d9ac399f5fa973315c6827a040b7aae1f/scripts/obtain/dotnet-install.ps1'
-            Version = '1.0.1'
-        }
-
-    if ([Environment]::Is64BitOperatingSystem) {
-        $arch = "x64";
-    }
-    else {
-        $arch = "x86";
-    }
-
-    $env:DOTNET_HOME=$cli.Root
-    $env:DOTNET_INSTALL_DIR=$NuGetClientRoot
-
-    if ($Force -or -not (Test-Path $cli.DotNetExe)) {
-        Trace-Log 'Downloading .NET CLI'
-
-        New-Item -ItemType Directory -Force -Path $cli.Root | Out-Null
-
-        $DotNetInstall = Join-Path $cli.Root 'dotnet-install.ps1'
-
-        Invoke-WebRequest $cli.DotNetInstallUrl -OutFile $DotNetInstall
-
-        & $DotNetInstall -Channel preview -i $cli.Root -Version $cli.Version -Architecture $arch
     }
 
     if (-not (Test-Path $cli.DotNetExe)) {
